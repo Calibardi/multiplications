@@ -9,17 +9,41 @@ import SwiftUI
 
 struct HomeView: View {
     private let appTittle: String = "Multiplications!"
+    private let tableRange: ClosedRange<Int> = 2...12
+    
     @State private var choosenTable: Int = 2
+    @State private var viewState: ViewState = .playing
+    @State private var secondMultiplicand: Int = 1
     @State private var numberOfQuestions: Int = 10
-    @State private var viewState: ViewState = .starting
+    @State private var answeredQuestions: Int = 0
+    @State private var currentQuestionNumber: Int = 1
+    @State private var questions: [Question] = [Question(mainMultiplicand: 12, secondMultiplicand: 6)]
+    @State private var score: Int = 0
+    
+    private var lastQuestion: Question? {
+        questions.last
+    }
     
     var body: some View {
         switch viewState {
         case .starting:
-            startingContent
+            startingContentView
         case .playing:
-            Text("Playing!")
+            playingContentView
         }
+    }
+}
+
+private extension HomeView {
+    func startGame() {
+        questions.append(generateNewQuestion())
+    }
+    
+    func generateNewQuestion() -> Question {
+        secondMultiplicand = tableRange.randomElement() ?? 1
+        return Question(
+            mainMultiplicand: choosenTable,
+            secondMultiplicand: secondMultiplicand)
     }
 }
 
@@ -29,7 +53,7 @@ private extension HomeView {
         case playing
     }
     
-    var startingContent: some View {
+    var startingContentView: some View {
         return ZStack {
             appGradient
             VStack {
@@ -51,9 +75,9 @@ private extension HomeView {
                 .clipShape(.rect(cornerRadius: 10))
                 .padding(.horizontal, 20)
                 .onTapGesture {
-                    print("tapped")
+                    viewState = .playing
                 }
-
+                
                 VStack {
                     Text("Choose a table to exercise with:")
                         .font(.subheadline)
@@ -63,7 +87,7 @@ private extension HomeView {
                 .background(.thinMaterial)
                 
                 VStack {
-                    Text("Choose the number of questions")
+                    Text("Choose the number of questions:")
                         .font(.subheadline)
                     questionPicker
                 }
@@ -73,9 +97,54 @@ private extension HomeView {
         }
     }
     
+    var playingContentView: some View {
+        return ZStack {
+            appGradient
+            
+            VStack {
+                topViewBar
+                
+                Spacer()
+                
+                VStack(spacing: -35) {
+                    HStack(spacing: 5) {
+                        Text(lastQuestion?.mainMultiplicand.description ?? "")
+                            .frame(width: 120, alignment: .trailing)
+                            .roundedShadowed(textSize: 100)
+                        Text("x")
+                            .roundedShadowed(textSize: 50)
+                            .frame(width: 50)
+                    }
+                    
+                    HStack {
+                        Text(lastQuestion?.secondMultiplicand.description ?? "")
+                            .frame(width: 120, alignment: .trailing)
+                            .roundedShadowed(textSize: 100)
+                        Text("=")
+                            .roundedShadowed(textSize: 50)
+                            .frame(width: 50)
+                    }
+                }
+                
+                Spacer()
+                
+                GridStack(
+                    rows: 2,
+                    columns: 2,
+                    rowSpacing: 20,
+                    columnsSpacing: 20) { row, column in
+                        Text(lastQuestion?.answers[(2 * row) + column].description ?? "")
+                            .frame(width: 120, height: 100)
+                            .colorfulTextBox(textSize: 50, backgroundColor: .blue)
+                    }
+            }
+            .padding(.bottom, 50)
+        }
+    }
+    
     var tablePicker: some View {
         Picker(selection: $choosenTable) {
-            ForEach(2..<13, id: \.self) { element in
+            ForEach(tableRange, id: \.self) { element in
                 Text(element.description)
             }
         } label: {
@@ -92,7 +161,7 @@ private extension HomeView {
                 Text(element.description)
             }
         } label: {
-            Text("Choose the number of questions")
+            Text("Choose the number of questions:")
         }
         .pickerStyle(.palette)
         .frame(width: .infinity, height: 10)
@@ -106,6 +175,23 @@ private extension HomeView {
             endPoint: .bottomTrailing
         )
         .ignoresSafeArea()
+    }
+    
+    var topViewBar: some View {
+        HStack {
+            scoreCounter
+            Spacer()
+            roundCounter
+        }
+        .padding(.horizontal)
+    }
+    
+    var roundCounter: some View {
+        VerticalTextBox(topText: "\(currentQuestionNumber) / \(numberOfQuestions)", bottomText: "rounds")
+    }
+    
+    var scoreCounter: some View {
+        VerticalTextBox(topText: "\(score)", bottomText: "score")
     }
 }
 
