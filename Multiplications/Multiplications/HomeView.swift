@@ -12,7 +12,7 @@ struct HomeView: View {
     private let tableRange: ClosedRange<Int> = 2...12
     
     @State private var choosenTable: Int = 2
-    @State private var viewState: ViewState = .starting
+    @State private var viewState: ViewState = .playing
     @State private var secondMultiplicand: Int = 1
     @State private var numberOfQuestions: Int = 10
     @State private var answeredQuestions: Int = 0
@@ -78,6 +78,24 @@ private extension HomeView {
         
         return lastQuestion.answers[chosenIndex] == lastQuestion.rightAnswer
     }
+    
+    func goToState(_ state: ViewState) {
+        viewState = state
+        
+        switch viewState {
+        case .starting:
+            currentQuestionNumber = 1
+            answeredQuestions = 0
+            score = 0
+            questions.removeAll()
+        case .playing:
+            break
+        }
+    }
+    
+    func resetGame() {
+        goToState(.starting)
+    }
 }
 
 private extension HomeView {
@@ -103,12 +121,8 @@ private extension HomeView {
                     Image(systemName: "chevron.right")
                     Spacer()
                 }
-                .roundedShadowed(textSize: 20)
-                .frame(width: .infinity)
-                .padding()
-                .background(.thinMaterial)
-                .clipShape(.rect(cornerRadius: 10))
-                .padding(.horizontal, 20)
+                .colorfulTextBox(textSize: 20, backgroundColor: .blue)
+                .padding(.horizontal, 75)
                 .onTapGesture {
                     viewState = .playing
                 }
@@ -119,15 +133,13 @@ private extension HomeView {
                     tablePicker
                 }
                 .padding(.vertical, 20)
-                .background(.thinMaterial)
                 
                 VStack {
                     Text("Choose the number of questions:")
                         .roundedShadowed(textSize: 20)
                     questionPicker
                 }
-                .padding(.vertical, 20)
-                .background(.thinMaterial)
+                .padding(.bottom, 20)
             }
         }
     }
@@ -136,7 +148,7 @@ private extension HomeView {
         return ZStack {
             appGradient
             
-            VStack {
+            VStack(spacing: 40) {
                 topViewBar
                 
                 Spacer()
@@ -163,21 +175,39 @@ private extension HomeView {
                 
                 Spacer()
                 
-                GridStack(
-                    rows: 2,
-                    columns: 2,
-                    rowSpacing: 20,
-                    columnsSpacing: 20) { row, column in
-                        Text(lastQuestion?.answers[(2 * row) + column].description ?? "")
-                            .frame(width: 120, height: 100)
-                            .colorfulTextBox(textSize: 50, backgroundColor: .blue)
-                            .onTapGesture {
-                                answerButtonDidTap(answerIndex: (2 * row) + column)
-                            }
-                            .disabled(gameIsOver)
+                VStack {
+                    GridStack(
+                        rows: 2,
+                        columns: 2,
+                        rowSpacing: 20,
+                        columnsSpacing: 20) { row, column in
+                            Text(lastQuestion?.answers[(2 * row) + column].description ?? "")
+                                .frame(width: 120, height: 100)
+                                .colorfulTextBox(textSize: 50, backgroundColor: .blue)
+                                .onTapGesture {
+                                    answerButtonDidTap(answerIndex: (2 * row) + column)
+                                }
+                                .disabled(gameIsOver)
+                        }
+                }
+
+                HStack {
+                    Button {
+                        resetGame()
+                    } label: {
+                        Image(systemName: "restart.circle")
                     }
+                    Spacer()
+                    Button {
+                        print("Tapped")
+                    } label: {
+                        Image(systemName: "trophy.circle")
+                    }.opacity(gameIsOver ? 1 : 0)
+                }
+                .roundedShadowed(textSize: 30)
+                .padding(.horizontal, 25)
             }
-            .padding(.bottom, 50)
+            .padding(.bottom, 20)
         }
     }
     
@@ -190,8 +220,9 @@ private extension HomeView {
             Text("Choose a table")
         }
         .pickerStyle(.palette)
-        .frame(height: 10)
-        .padding()
+        .frame(height: 50)
+        .colorfulTextBox(textSize: 50, backgroundColor: .orange)
+        .padding(.horizontal, 20)
     }
     
     var questionPicker: some View {
@@ -203,8 +234,9 @@ private extension HomeView {
             Text("Choose the number of questions:")
         }
         .pickerStyle(.palette)
-        .frame(height: 10)
-        .padding()
+        .frame(height: 50)
+        .colorfulTextBox(textSize: 50, backgroundColor: .orange)
+        .padding(.horizontal, 20)
     }
     
     var appGradient: some View {

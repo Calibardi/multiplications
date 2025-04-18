@@ -30,10 +30,10 @@ struct AnimatedXBackground: View {
                     Text(symbol)
                         .font(.system(size: randomSize, weight: .heavy, design: .rounded))
                         .foregroundColor(randomColor.opacity(symbolOpacityValue))
-                        .shadow(radius: 0.2)
+                        .shadow(radius: 0.3)
                         .position(
                             x: .random(in: 0..<geo.size.width),
-                            y: animating ? -50 : geo.size.height + 50
+                            y: animating ? geo.size.height + 50 : -50
                         )
                         .animation(
                             .linear(duration: animationDuration)
@@ -54,5 +54,5 @@ struct AnimatedXBackground: View {
 
 #Preview {
     AnimatedXBackground()
-        .background(.black)
+        .background(.white)
 }

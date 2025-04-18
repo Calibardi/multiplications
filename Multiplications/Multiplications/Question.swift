@@ -31,16 +31,12 @@ struct Question {
         } else if topLimit == 12 {
             bottomLimit = 12 - delta
         }
-        
-        debugPrint("Generated top limit: \(topLimit) - bottomLimit: \(bottomLimit)")
-        
+                
         var wrongAnswers: [Int] = []
         for multiplicand in (bottomLimit...topLimit) where multiplicand != secondMultiplicand {
             wrongAnswers.append(mainMultiplicand * multiplicand)
         }
-        
-        debugPrint("Generated wrong answers: \(wrongAnswers) - count: \(wrongAnswers.count)", terminator: "\n-----------\n")
-                
+                        
         (0..<3).forEach { _ in
             let choosenAnswerIndex: Int = Int.random(in: 0..<wrongAnswers.count)
             answers.append(wrongAnswers.remove(at: choosenAnswerIndex))
