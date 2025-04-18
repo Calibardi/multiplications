@@ -233,46 +233,6 @@ private extension HomeView {
     }
 }
 
-struct AnimatedXBackground: View {
-    // Configuration
-    private let symbol = "×" // Your symbol
-    private let symbolCount = 70
-    private let animationDuration: Double = 8
-    private let symbolSizeRange: ClosedRange<CGFloat> = 20...50
-    private let symbolOpacity: Double = 0.8
-    
-    // Track animation state
-    @State private var animating = false
-    
-    var body: some View {
-        GeometryReader { geo in
-            ZStack {
-                ForEach(0..<symbolCount, id: \.self) { index in
-                    Text(symbol)
-                        .font(.system(size: .random(in: symbolSizeRange), weight: .heavy, design: .rounded))
-                        .foregroundColor(.white.opacity(symbolOpacity))
-                        .shadow(radius: 1)
-                        .position(
-                            x: .random(in: 0..<geo.size.width),
-                            y: animating ? -100 : geo.size.height + 100 // Start below, move above
-                        )
-                        .animation(
-                            .linear(duration: animationDuration)
-                            .delay(Double(index) * (animationDuration / Double(symbolCount)))
-                            .repeatForever(autoreverses: false),
-                            value: animating)
-                }
-            }
-        }
-        .ignoresSafeArea()
-        .onAppear {
-            withAnimation {
-                animating = true // Trigger animation
-            }
-        }
-    }
-}
-
 #Preview {
     HomeView()
 }
