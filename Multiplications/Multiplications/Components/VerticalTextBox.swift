@@ -10,9 +10,10 @@ import SwiftUI
 struct VerticalTextBox: View {
     let topText: String
     let bottomText: String
+    let horizontalAlignment: HorizontalAlignment
     
     var body: some View {
-        VStack(alignment: .trailing, spacing: -8) {
+        VStack(alignment: horizontalAlignment, spacing: -8) {
             Text(topText)
                 .roundedShadowed(textSize: 35)
             Text(bottomText)

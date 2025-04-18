@@ -12,13 +12,17 @@ struct HomeView: View {
     private let tableRange: ClosedRange<Int> = 2...12
     
     @State private var choosenTable: Int = 2
-    @State private var viewState: ViewState = .playing
+    @State private var viewState: ViewState = .starting
     @State private var secondMultiplicand: Int = 1
     @State private var numberOfQuestions: Int = 10
     @State private var answeredQuestions: Int = 0
     @State private var currentQuestionNumber: Int = 1
-    @State private var questions: [Question] = [Question(mainMultiplicand: 12, secondMultiplicand: 6)]
+    @State private var questions: [Question] = []
     @State private var score: Int = 0
+    
+    private var gameIsOver: Bool {
+        return answeredQuestions == numberOfQuestions
+    }
     
     private var lastQuestion: Question? {
         questions.last
@@ -30,12 +34,33 @@ struct HomeView: View {
             startingContentView
         case .playing:
             playingContentView
+                .onAppear {
+                    questions.append(generateNewQuestion())
+                }
         }
+    }
+    
+    private func answerButtonDidTap(answerIndex: Int) {
+        answeredQuestions += 1
+        if checkAnswerRightfulness(at: answerIndex) {
+            score += 1
+        }
+        
+        goToNextQuestion()
     }
 }
 
 private extension HomeView {
     func startGame() {
+        viewState = .playing
+    }
+    
+    func goToNextQuestion() {
+        guard !gameIsOver else {
+            return
+        }
+        
+        currentQuestionNumber += 1
         questions.append(generateNewQuestion())
     }
     
@@ -44,6 +69,14 @@ private extension HomeView {
         return Question(
             mainMultiplicand: choosenTable,
             secondMultiplicand: secondMultiplicand)
+    }
+    
+    func checkAnswerRightfulness(at chosenIndex: Int) -> Bool {
+        guard let lastQuestion else {
+            return false
+        }
+        
+        return lastQuestion.answers[chosenIndex] == lastQuestion.rightAnswer
     }
 }
 
@@ -56,6 +89,7 @@ private extension HomeView {
     var startingContentView: some View {
         return ZStack {
             appGradient
+            AnimatedXBackground()
             VStack {
                 Spacer()
                 
@@ -109,7 +143,7 @@ private extension HomeView {
                 VStack(spacing: -35) {
                     HStack(spacing: 5) {
                         Text(lastQuestion?.mainMultiplicand.description ?? "")
-                            .frame(width: 120, alignment: .trailing)
+                            .frame(width: 130, alignment: .trailing)
                             .roundedShadowed(textSize: 100)
                         Text("x")
                             .roundedShadowed(textSize: 50)
@@ -118,7 +152,7 @@ private extension HomeView {
                     
                     HStack {
                         Text(lastQuestion?.secondMultiplicand.description ?? "")
-                            .frame(width: 120, alignment: .trailing)
+                            .frame(width: 130, alignment: .trailing)
                             .roundedShadowed(textSize: 100)
                         Text("=")
                             .roundedShadowed(textSize: 50)
@@ -136,6 +170,10 @@ private extension HomeView {
                         Text(lastQuestion?.answers[(2 * row) + column].description ?? "")
                             .frame(width: 120, height: 100)
                             .colorfulTextBox(textSize: 50, backgroundColor: .blue)
+                            .onTapGesture {
+                                answerButtonDidTap(answerIndex: (2 * row) + column)
+                            }
+                            .disabled(gameIsOver)
                     }
             }
             .padding(.bottom, 50)
@@ -151,7 +189,7 @@ private extension HomeView {
             Text("Choose a table")
         }
         .pickerStyle(.palette)
-        .frame(width: .infinity, height: 10)
+        .frame(height: 10)
         .padding()
     }
     
@@ -164,7 +202,7 @@ private extension HomeView {
             Text("Choose the number of questions:")
         }
         .pickerStyle(.palette)
-        .frame(width: .infinity, height: 10)
+        .frame(height: 10)
         .padding()
     }
     
@@ -187,11 +225,51 @@ private extension HomeView {
     }
     
     var roundCounter: some View {
-        VerticalTextBox(topText: "\(currentQuestionNumber) / \(numberOfQuestions)", bottomText: "rounds")
+        VerticalTextBox(topText: "\(currentQuestionNumber) / \(numberOfQuestions)", bottomText: "rounds", horizontalAlignment: .trailing)
     }
     
     var scoreCounter: some View {
-        VerticalTextBox(topText: "\(score)", bottomText: "score")
+        VerticalTextBox(topText: "\(score)", bottomText: "score", horizontalAlignment: .leading)
+    }
+}
+
+struct AnimatedXBackground: View {
+    // Configuration
+    private let symbol = "×" // Your symbol
+    private let symbolCount = 70
+    private let animationDuration: Double = 8
+    private let symbolSizeRange: ClosedRange<CGFloat> = 20...50
+    private let symbolOpacity: Double = 0.8
+    
+    // Track animation state
+    @State private var animating = false
+    
+    var body: some View {
+        GeometryReader { geo in
+            ZStack {
+                ForEach(0..<symbolCount, id: \.self) { index in
+                    Text(symbol)
+                        .font(.system(size: .random(in: symbolSizeRange), weight: .heavy, design: .rounded))
+                        .foregroundColor(.white.opacity(symbolOpacity))
+                        .shadow(radius: 1)
+                        .position(
+                            x: .random(in: 0..<geo.size.width),
+                            y: animating ? -100 : geo.size.height + 100 // Start below, move above
+                        )
+                        .animation(
+                            .linear(duration: animationDuration)
+                            .delay(Double(index) * (animationDuration / Double(symbolCount)))
+                            .repeatForever(autoreverses: false),
+                            value: animating)
+                }
+            }
+        }
+        .ignoresSafeArea()
+        .onAppear {
+            withAnimation {
+                animating = true // Trigger animation
+            }
+        }
     }
 }
 

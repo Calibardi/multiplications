@@ -21,26 +21,29 @@ struct Question {
     
     private func generateAnswers() -> [Int] {
         var answers: [Int] = [rightAnswer]
-        let multiplicandOffset: Int = 2
+        let multiplicandOffset: Int = 3
+        let delta = multiplicandOffset * 2 
+        var bottomLimit: Int = max(secondMultiplicand - multiplicandOffset, 2)
+        var topLimit: Int = min(secondMultiplicand + multiplicandOffset, 12)
         
-        var bottomLimit: Int = secondMultiplicand - 2
-        var topLimit: Int = secondMultiplicand + 2
-        
-        if bottomLimit < 2 {
-            bottomLimit = 2
+        if bottomLimit == 2 {
+            topLimit = 2 + delta
+        } else if topLimit == 12 {
+            bottomLimit = 12 - delta
         }
         
-        if topLimit > 12 {
-            topLimit = 9
-        }
+        debugPrint("Generated top limit: \(topLimit) - bottomLimit: \(bottomLimit)")
         
         var wrongAnswers: [Int] = []
         for multiplicand in (bottomLimit...topLimit) where multiplicand != secondMultiplicand {
             wrongAnswers.append(mainMultiplicand * multiplicand)
         }
         
+        debugPrint("Generated wrong answers: \(wrongAnswers) - count: \(wrongAnswers.count)", terminator: "\n-----------\n")
+                
         (0..<3).forEach { _ in
-            answers.append(wrongAnswers.remove(at: Int.random(in: 0..<wrongAnswers.count)))
+            let choosenAnswerIndex: Int = Int.random(in: 0..<wrongAnswers.count)
+            answers.append(wrongAnswers.remove(at: choosenAnswerIndex))
         }
         
         return answers.shuffled()
