@@ -94,7 +94,7 @@ private extension HomeView {
                 Spacer()
                 
                 Text(appTittle)
-                    .font(.largeTitle)
+                    .roundedShadowed(textSize: 40)
                 Spacer()
                 
                 HStack {
@@ -103,6 +103,7 @@ private extension HomeView {
                     Image(systemName: "chevron.right")
                     Spacer()
                 }
+                .roundedShadowed(textSize: 20)
                 .frame(width: .infinity)
                 .padding()
                 .background(.thinMaterial)
@@ -114,7 +115,7 @@ private extension HomeView {
                 
                 VStack {
                     Text("Choose a table to exercise with:")
-                        .font(.subheadline)
+                        .roundedShadowed(textSize: 20)
                     tablePicker
                 }
                 .padding(.vertical, 20)
@@ -122,7 +123,7 @@ private extension HomeView {
                 
                 VStack {
                     Text("Choose the number of questions:")
-                        .font(.subheadline)
+                        .roundedShadowed(textSize: 20)
                     questionPicker
                 }
                 .padding(.vertical, 20)
