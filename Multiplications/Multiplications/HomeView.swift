@@ -19,7 +19,7 @@ struct HomeView: View {
     @State private var currentQuestionNumber: Int = 1
     @State private var questions: [Question] = []
     @State private var score: Int = 0
-    @State private var questionsState: [AnswerButtonState] = [.normal, .normal, .normal, .normal]
+    @State private var answerButtonsState: [AnswerButtonState] = [.normal, .normal, .normal, .normal]
     
     private var gameIsOver: Bool {
         return answeredQuestions == numberOfQuestions
@@ -105,14 +105,14 @@ private extension HomeView {
 
     private func updateButtonState(for index: Int) {
         if checkAnswerRightfulness(at: index) {
-            questionsState[index] = .rightAnswer
+            answerButtonsState[index] = .rightAnswer
         } else {
-            questionsState[index] = .wrongAnswer
+            answerButtonsState[index] = .wrongAnswer
         }
     }
     
     private func resetQuestionStates() {
-        questionsState = Array(repeating: .normal, count: 4)
+        answerButtonsState = Array(repeating: .normal, count: 4)
     }
 }
 
@@ -218,12 +218,12 @@ private extension HomeView {
                         columnsSpacing: 20) { row, column in
                             Text(lastQuestion?.answers[(2 * row) + column].description ?? "")
                                 .frame(width: 120, height: 100)
-                                .colorfulTextBox(textSize: 50, backgroundColor: questionsState[(2 * row) + column].color)
+                                .colorfulTextBox(textSize: 50, backgroundColor: answerButtonsState[(2 * row) + column].color)
                                 .onTapGesture {
                                     answerButtonDidTap(answerIndex: (2 * row) + column)
                                 }
                                 .disabled(gameIsOver)
-                                .animation(.default, value: questionsState)
+                                .animation(.default, value: answerButtonsState)
                         }
                 }
 
