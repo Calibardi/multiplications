@@ -42,10 +42,10 @@ struct HomeView: View {
     }
     
     private func answerButtonDidTap(answerIndex: Int) {
-        updateButtonState(for: answerIndex)
+        updateAnswerButtonState(for: answerIndex)
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-            resetQuestionStates()
+            resetAnswerButtonsStates()
             answeredQuestions += 1
             if checkAnswerRightfulness(at: answerIndex) {
                 score += 1
@@ -103,7 +103,7 @@ private extension HomeView {
         goToState(.starting)
     }
 
-    private func updateButtonState(for index: Int) {
+    private func updateAnswerButtonState(for index: Int) {
         if checkAnswerRightfulness(at: index) {
             answerButtonsState[index] = .rightAnswer
         } else {
@@ -111,7 +111,7 @@ private extension HomeView {
         }
     }
     
-    private func resetQuestionStates() {
+    private func resetAnswerButtonsStates() {
         answerButtonsState = Array(repeating: .normal, count: 4)
     }
 }
