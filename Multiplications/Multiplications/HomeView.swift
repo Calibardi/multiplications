@@ -19,6 +19,7 @@ struct HomeView: View {
     @State private var currentQuestionNumber: Int = 1
     @State private var questions: [Question] = []
     @State private var score: Int = 0
+    @State private var questionsState: [AnswerButtonState] = [.normal, .normal, .normal, .normal]
     
     private var gameIsOver: Bool {
         return answeredQuestions == numberOfQuestions
@@ -41,12 +42,17 @@ struct HomeView: View {
     }
     
     private func answerButtonDidTap(answerIndex: Int) {
-        answeredQuestions += 1
-        if checkAnswerRightfulness(at: answerIndex) {
-            score += 1
-        }
+        updateButtonState(for: answerIndex)
         
-        goToNextQuestion()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+            resetQuestionStates()
+            answeredQuestions += 1
+            if checkAnswerRightfulness(at: answerIndex) {
+                score += 1
+            }
+            
+            goToNextQuestion()
+        }
     }
 }
 
@@ -96,12 +102,41 @@ private extension HomeView {
     func resetGame() {
         goToState(.starting)
     }
+
+    private func updateButtonState(for index: Int) {
+        if checkAnswerRightfulness(at: index) {
+            questionsState[index] = .rightAnswer
+        } else {
+            questionsState[index] = .wrongAnswer
+        }
+    }
+    
+    private func resetQuestionStates() {
+        questionsState = Array(repeating: .normal, count: 4)
+    }
 }
 
 private extension HomeView {
     enum ViewState {
         case starting
         case playing
+    }
+    
+    enum AnswerButtonState {
+        case rightAnswer
+        case wrongAnswer
+        case normal
+        
+        var color: Color {
+            switch self {
+            case .rightAnswer:
+                return .green
+            case .wrongAnswer:
+                return .red
+            case .normal:
+                return .blue
+            }
+        }
     }
     
     var startingContentView: some View {
@@ -183,11 +218,12 @@ private extension HomeView {
                         columnsSpacing: 20) { row, column in
                             Text(lastQuestion?.answers[(2 * row) + column].description ?? "")
                                 .frame(width: 120, height: 100)
-                                .colorfulTextBox(textSize: 50, backgroundColor: .blue)
+                                .colorfulTextBox(textSize: 50, backgroundColor: questionsState[(2 * row) + column].color)
                                 .onTapGesture {
                                     answerButtonDidTap(answerIndex: (2 * row) + column)
                                 }
                                 .disabled(gameIsOver)
+                                .animation(.default, value: questionsState)
                         }
                 }
 
