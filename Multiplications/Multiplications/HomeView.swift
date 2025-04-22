@@ -66,8 +66,10 @@ private extension HomeView {
             return
         }
         
-        currentQuestionNumber += 1
-        questions.append(generateNewQuestion())
+        withAnimation {
+            currentQuestionNumber += 1
+            questions.append(generateNewQuestion())
+        }
     }
     
     func generateNewQuestion() -> Question {
@@ -202,6 +204,10 @@ private extension HomeView {
                         Text(lastQuestion?.secondMultiplicand.description ?? "")
                             .frame(width: 130, alignment: .trailing)
                             .roundedShadowed(textSize: 100)
+                            .transition(.asymmetric(
+                                insertion: .move(edge: .top).combined(with: .opacity),
+                                removal: .move(edge: .bottom).combined(with: .opacity)))
+                            .id(currentQuestionNumber)
                         Text("=")
                             .roundedShadowed(textSize: 50)
                             .frame(width: 50)
