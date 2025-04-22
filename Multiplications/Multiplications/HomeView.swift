@@ -12,7 +12,7 @@ struct HomeView: View {
     private let tableRange: ClosedRange<Int> = 2...12
     
     @State private var choosenTable: Int = 2
-    @State private var viewState: ViewState = .playing
+    @State private var viewState: ViewState = .starting
     @State private var secondMultiplicand: Int = 1
     @State private var numberOfQuestions: Int = 10
     @State private var answeredQuestions: Int = 0
